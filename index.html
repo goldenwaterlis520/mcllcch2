@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>李老师课堂连词成句</title>
+    <style>
+        /* 全局样式 */
+        body {
+            background-color: #f5f5dc; /* 奶白色背景 */
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* 标题样式 */
+        h1 {
+            font-size: 36px;
+            color: #ff6f61; /* 可爱的粉色 */
+            margin-top: 20px;
+        }
+
+        /* 词语文本框样式 */
+        .word-box {
+            display: inline-block;
+            padding: 15px 20px;
+            margin: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            background-color: #ffcc5c; /* 亮黄色 */
+            border: 2px solid #ff6f61; /* 粉色边框 */
+            border-radius: 10px;
+            box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        /* 木盒样式 */
+        #wooden-box {
+            width: 80%;
+            height: 100px;
+            margin: 20px auto;
+            background-color: #8b4513; /* 木色 */
+            border: 5px solid #654321; /* 深木色边框 */
+            border-radius: 10px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* 按钮样式 */
+        #controls {
+            margin-top: 20px;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff6f61; /* 粉色 */
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #ff3b2f; /* 深粉色 */
+        }
+
+        /* 震动效果 */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake {
+            animation: shake 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <h1>李老师课堂连词成句 Make Sentence</h1>
+    <div id="game-area">
+        <div id="words-container"></div>
+        <div id="wooden-box"></div>
+    </div>
+    <div id="controls">
+        <button id="prev-sentence">上一句</button>
+        <button id="next-sentence">下一句</button>
+    </div>
+    <div id="result"></div>
+
+    <script>
+        // 句子和词语
+        const sentences = [
+            ["你", "在", "做", "什么"],
+            ["我", "在", "打", "游戏"],
+            ["你", "昨天", "做了", "什么"],
+            ["昨天", "我", "打了", "羽毛球"],
+            ["你", "明天", "要", "做", "什么"],
+            ["明天", "我", "会", "看剧"],
+            ["我的", "爸爸", "是", "教师", "他在", "学校", "工作"],
+            ["我", "会", "玩", "电脑"],
+            ["我", "不会", "刷", "抖音", "和", "看", "电视"],
+            ["我", "喜欢", "滑冰"],
+            ["我", "不喜欢", "烘焙"]
+        ];
+
+        let currentSentenceIndex = 0; // 当前句子索引
+        let startTime; // 游戏开始时间
+        let correctOrder = []; // 正确顺序
+        let userOrder = []; // 用户点击顺序
+
+        // 获取DOM元素
+        const wordsContainer = document.getElementById("words-container");
+        const woodenBox = document.getElementById("wooden-box");
+        const prevButton = document.getElementById("prev-sentence");
+        const nextButton = document.getElementById("next-sentence");
+        const resultElement = document.getElementById("result");
+
+        // 初始化游戏
+        function startGame() {
+            startTime = new Date(); // 记录开始时间
+            loadSentence(currentSentenceIndex);
+        }
+
+        // 加载句子
+        function loadSentence(index) {
+            wordsContainer.innerHTML = ""; // 清空词语容器
+            woodenBox.innerHTML = ""; // 清空木盒
+            correctOrder = sentences[index]; // 设置正确顺序
+            userOrder = []; // 重置用户顺序
+
+            // 打乱词语顺序
+            const shuffledWords = shuffle([...correctOrder]);
+
+            // 创建词语文本框
+            shuffledWords.forEach((word, i) => {
+                const wordBox = document.createElement("div");
+                wordBox.className = "word-box";
+                wordBox.textContent = word;
+                wordBox.addEventListener("click", () => handleWordClick(word, wordBox));
+                wordsContainer.appendChild(wordBox);
+            });
+        }
+
+        // 打乱数组顺序
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 处理词语点击事件
+        function handleWordClick(word, wordBox) {
+            if (word === correctOrder[userOrder.length]) {
+                userOrder.push(word);
+                woodenBox.appendChild(wordBox);
+                wordBox.style.cursor = "default";
+                wordBox.removeEventListener("click", () => handleWordClick(word, wordBox));
+
+                // 检查是否完成句子
+                if (userOrder.length === correctOrder.length) {
+                    setTimeout(() => {
+                        alert("你太棒啦！You are amazing!");
+                    }, 100);
+                }
+            } else {
+                wordBox.classList.add("shake");
+                setTimeout(() => wordBox.classList.remove("shake"), 500);
+            }
+        }
+
+        // 切换到上一句
+        prevButton.addEventListener("click", () => {
+            if (currentSentenceIndex > 0) {
+                currentSentenceIndex--;
+                loadSentence(currentSentenceIndex);
+            }
+        });
+
+        // 切换到下一句
+        nextButton.addEventListener("click", () => {
+            if (currentSentenceIndex < sentences.length - 1) {
+                currentSentenceIndex++;
+                loadSentence(currentSentenceIndex);
+            } else {
+                const endTime = new Date();
+                const timeTaken = (endTime - startTime) / 1000; // 计算用时（秒）
+                const minutes = Math.floor(timeTaken / 60);
+                const seconds = Math.floor(timeTaken % 60);
+                resultElement.textContent = `你用了 ${minutes} 分 ${seconds} 秒完成所有句子！`;
+            }
+        });
+
+        // 启动游戏
+        startGame();
+    </script>
+</body>
+</html>
